@@ -34,10 +34,13 @@ void change(int &a, int &b)
 
 void bubbleSort(int num, int a[])
 {
-    for(int i=1;i<num;i++){
-	for(int j=0;j<num-i;j++){
-	    if(a[j] > a[j+1]){
-		change(a[j], a[j+1]);
+    bool flag = true;
+    while(flag){
+	flag = false;
+	for(int i=0;i<num-1;i++){
+	    if(a[i]>a[i+1]){
+		change(a[i], a[i+1]);
+		flag = true;
 	    }
 	}
     }
