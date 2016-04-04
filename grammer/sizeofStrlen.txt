@@ -1,0 +1,210 @@
+int main( )
+
+
+{      
+
+   char str0[8]={'a','b','c','d','e','f','i','g'};
+
+   char str1[]="abcdefig";
+
+   char str2[]="01234/056789" ;
+
+   char str3[]="abcse/0fgkij";
+
+   printf("strlen(str0)=%d/n",strlen(str0));
+
+   printf("strlen(str1)=%d/n",strlen(str1));
+
+   printf("strlen(str2)=%d/n",strlen(str2));  
+
+   printf("strlen(str3)=%d/n",strlen(str3));
+
+}
+
+请问输出什么？
+
+我用vc++6.0运行结果为：
+
+strlen（str0）=11
+
+strlen（str1）=8
+
+strlen（str2）=9
+
+strlen（str3）=5
+
+str0为什么会是11，和str1输出有什么区别？str2和str3同样的'/0'，输出的效果却不同，请问这是什么原因造成的
+
+||
+
+需要明确的第一点，strlen所作的仅仅是一个计数器的工作，它从内存的某个位置（可以是字符串开头，中间某个位置，甚至是某个不确定的内存区域）开始扫描，直到碰到第一个字符串结束符'/0'为止，然后返回计数器值。
+
+
+例如以下代码片断理论上也是可以编译通过的：
+
+char str[]="abcdefg";
+
+printf("%d/n",strlen(&str[5]));
+
+
+结果应当为2。
+
+该例中，strlen从字符str[5]即'f'开始计数，当到达'g'之后遇到'/0'并停止计数。因此结果为2。
+
+
+||
+
+str2和str3的主要区别就在于C/C++字符串中，允许形如“/056”这样的所谓转义字符存在，它们仅表示一个字节位（byte），一般用于输出无法直接通过键盘输入的字符。
+
+||
+
+str0的sizeof为8，导致没有/0结束，因此strlen的返回是不可预期的。
+
+str1的sizeof实际上是9，会自动加/0结束。
+
+str2的/056会被解释成8进制数056表示的字符，因此strlen是9
+
+str3的/0会被解释为结束符 
+
+
+
+
+
+
+C++ strlen 与　sizeof　的深度认识
+
+一、由几个例子说开去。
+
+第一个例子： 
+
+char* ss = "0123456789";
+
+sizeof(ss) 结果 4 ＝＝＝》ss是指向字符串常量的字符指针
+
+sizeof(*ss) 结果 1 ＝＝＝》*ss是第一个字符
+
+char ss[] = "0123456789";
+
+sizeof(ss) 结果 11 ＝＝＝》ss是数组，计算到/0位置，因此是10＋1
+
+sizeof(*ss) 结果 1 ＝＝＝》*ss是第一个字符
+
+char ss[100] = "0123456789";
+
+sizeof(ss) 结果是100 ＝＝＝》ss表示在内存中的大小 100×1
+
+strlen(ss) 结果是10 ＝＝＝》strlen是个函数内部实现是用一个循环计算到/0为止之前
+
+int ss[100] = "0123456789";
+
+sizeof(ss) 结果 400 ＝＝＝》ss表示再内存中的大小 100×4
+
+strlen(ss) 错误 ＝＝＝》strlen的参数只能是char* 且必须是以'/0'结尾的
+
+char q[]="abc";
+
+char p[]="a/n";
+
+sizeof(q),sizeof(p),strlen(q),strlen(p);
+
+结果是 4 3 3 2      
+
+第二个例子：
+
+class X
+
+{
+
+       int i;
+
+       int j;
+
+       char k;
+
+};
+
+X x;
+
+cout<<sizeof(X)<<endl; 结果 12 ＝＝＝》内存补齐
+
+cout<<sizeof(x)<<endl; 结果 12 同上
+
+第三个例子：
+
+char szPath[MAX_PATH]
+
+　　如果在函数内这样定义，那么sizeof(szPath)将会是MAX_PATH，但是将szPath作为虚参声明时（void fun(char szPath[MAX_PATH])）,sizeof(szPath)却会是4(指针大小) 
+
+二、sizeof深入理解。 
+
+1.sizeof操作符的结果类型是size_t，它在头文件中typedef为unsigned　int类型。该类型保证能容纳实现所建立的最大对象的字节大小。 
+
+2.sizeof是算符，strlen是函数。 
+
+3.sizeof可以用类型做参数，strlen只能用char*做参数，且必须是以'/0'结尾的。sizeof还可以用函数做参数，比如： 
+
+short f();
+
+printf("%d/n", sizeof(f()));
+
+输出的结果是sizeof(short)，即2。 
+
+4.数组做sizeof的参数不退化，传递给strlen就退化为指针了。 
+
+5.大部分编译程序 在编译的时候就把sizeof计算过了 是类型或是变量的长度这就是sizeof(x)可以用来定义数组维数的原因 
+
+char str[20]="0123456789";
+
+int a=strlen(str); //a=10;
+
+int b=sizeof(str); //而b=20;
+
+6.strlen的结果要在运行的时候才能计算出来，时用来计算字符串的长度，不是类型占内存的大小。 
+
+7.sizeof后如果是类型必须加括弧，如果是变量名可以不加括弧。这是因为sizeof是个操作符不是个函数。 8.当适用了于一个结构类型时或变量， sizeof 返回实际的大小， 当适用一静态地空间数组， sizeof 归还全部数组的尺 寸。 sizeof 操作符不能返回动态地被分派了的数组或外部的数组的尺寸 
+
+9.数组作为参数传给函数时传的是指针而不是数组，传递的是数组的首地址，如： 
+
+fun(char [8])
+
+fun(char [])
+
+都等价于 fun(char *) 在C++里传递数组永远都是传递指向数组首元素的指针，编译器不知道数组的大小如果想在函数内知道数组的大小， 需要这样做：进入函数后用memcpy拷贝出来，长度由另一个形参传进去 
+
+fun(unsiged char *p1, int len)
+
+{
+
+   unsigned char* buf = new unsigned char[len+1]
+
+   memcpy(buf, p1, len);
+
+}
+
+有关内容见： C++ PRIMER? 
+
+10.计算结构变量的大小就必须讨论数据对齐问题。为了CPU存取的速度最快（这同CPU取数操作有关，详细的介绍可以参考一些计算机原理方面的书），C++在处理数据时经常把结构变量中的成员的大小按照4或8的倍数计算，这就叫数据对齐（data alignment）。这样做可能会浪费一些内存，但理论上速度快了。当然这样的设置会在读写一些别的应用程序生成的数据文件或交换数据时带来不便。MS VC++中的对齐设定，有时候sizeof得到的与实际不等。一般在VC++中加上#pragma pack(n)的设定即可.或者如果要按字节存储，而不进行数据对齐，可以在Options对话框中修改Advanced compiler页中的Data alignment为按字节对齐。 
+
+11.sizeof操作符不能用于函数类型，不完全类型或位字段。不完全类型指具有未知存储大小的数据类型，如未知存储大小的数组类型、未知内容的结构或联合类型、void类型等。如sizeof(max)若此时变量max定义为int　max(),sizeof(char_v)　若此时char_v定义为char　char_v　[MAX]且MAX未知，sizeof(void)都不是正确形式 
+
+三、结束语
+
+sizeof使用场合。 
+
+1.sizeof操作符的一个主要用途是与存储分配和I/O系统那样的例程进行通信。例如：　 
+
+　　void　*malloc（size_t　size）,　
+
+　　size_t　fread(void　*　ptr,size_t　size,size_t　nmemb,FILE　*　stream)。
+
+2.用它可以看看一类型的对象在内存中所占的单元字节。 
+
+       void　*　memset（void　*　s,int　c,sizeof(s)）
+
+3.在动态分配一对象时,可以让系统知道要分配多少内存。 
+
+4.便于一些类型的扩充,在windows中就有很多结构内型就有一个专用的字段是用来放该类型的字节大小。 
+
+5.由于操作数的字节数在实现时可能出现变化，建议在涉及到操作数字节大小时用sizeof来代替常量计算。 
+
+6.如果操作数是函数中的数组形参或函数类型的形参，sizeof给出其指针的大小。
