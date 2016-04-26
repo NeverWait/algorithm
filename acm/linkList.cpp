@@ -165,3 +165,145 @@ int main(void)
     }
     return 0;
 }
+//上面是用的struct,下面的方式是使用class方法
+#include <iostream>
+#include <assert.h>
+using namespace std;
+
+class List
+{
+public:
+    int num;
+    class List *next;
+    void create();
+    void print();
+    void find();
+    void insert();
+    void dele();
+    void choose();
+};
+typedef List Node;
+typedef Node *Link;
+Link top, p, s;
+void List::choose() {
+    List List1;
+    int r;
+    bool toD = true;
+    while(toD){
+        cout << "1, input data create a new table" << endl;
+        cout << "2, print the table" << endl;
+        cout << "3, find a digital in the table" << endl;
+        cout << "4, insert digital in the table" << endl;
+        cout << "5, delete the digital in the table" << endl;
+        cin >> r;
+        switch (r){
+            case 1:
+                List1.create();
+                break;
+            case 2:
+                List1.print();
+                break;
+            case 3:
+                List1.find();
+                break;
+            case 4:
+                List1.insert();
+                break;
+            case 5:
+                List1.dele();
+                break;
+            default:
+                toD = false;
+        }
+    }
+}
+void List::create() {
+    int c = 1;
+    top = new Node;
+    (*top).next = NULL;
+    p = top;
+    cout << "please enter a num, enter 0 if you want to return" << endl;
+    while(c != 0){
+        cin >> c;
+        if(c == 0){
+            break;
+        }
+        s = new Node;
+        s->num = c;
+        (*p).next = s;
+        (*s).next = NULL;
+        p = (*p).next;
+    }
+    print();
+}
+void List::print()
+{
+    if(top == NULL){
+        cout << "list is none" << endl;
+        return;
+    }
+    p = (*top).next;
+    while(p){
+        cout << (*p).num << ' ';
+        p = (*p).next;
+    }
+    cout << endl;
+}
+void List::find()
+{
+    int i;
+    p = (*top).next;
+    cout << "enter the num you want to find" << endl;
+    cin >> i;
+    while((*p).num != i && p != NULL){
+        p = (*p).next;
+    }
+    if(p == NULL){
+        cout << "not such data";
+    }
+    else
+    {
+        cout << (*p).num;
+    }
+    cout << endl;
+}
+void List::insert()
+{
+    assert(top != NULL);
+    p = new Node;
+    cout << "enter the num you want to insert:" << endl;
+    cin >> (*p).num;
+    (*p).next = (*top).next;
+    (*top).next = p;
+    print();
+}
+void List::dele()
+{
+    assert(top != NULL);
+    int i;
+    Link q;
+    cout << "enter the num you to delete" << endl;
+    cin >> i;
+    p = top;
+    q = (*top).next;
+    while(q){
+        if((*q).num == i){
+            (*p).next = (*q).next;
+            free(q);
+            cout << "delete successfully" << endl;
+            print();
+            return;
+        }
+        else{
+            q = (*q).next;
+            p = (*p).next;
+        }
+    }
+    print();
+    cout << "not such data" << endl;
+}
+int main(void){
+    List List1;
+    List1.choose();
+    return 0;
+}
